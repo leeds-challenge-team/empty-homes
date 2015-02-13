@@ -1,46 +1,54 @@
 FORMAT: 1A
 
+HOST: http://leedsempties.nickjackson.me/
+
 # Leeds Empty Homes
-Notes API is a *short texts saving* service similar to its physical paper presence on your table.
+The Leeds Empty Homes API retrieves information on properties in Leeds.
 
-# Group Notes
-Notes related resources of the **Notes API**
+# Group Wards
+Retrieve information on wards, or organised by ward.
 
-## Notes Collection [/notes]
-### List all Notes [GET]
-+ Response 200 (application/json)
-
-        [{
-          "id": 1, "title": "Jogging in park"
-        }, {
-          "id": 2, "title": "Pick-up posters from post-office"
-        }]
-
-### Create a Note [POST]
-+ Request (application/json)
-
-        { "title": "Buy cheese and bread for breakfast." }
-
-+ Response 201 (application/json)
-
-        { "id": 3, "title": "Buy cheese and bread for breakfast." }
-
-## Note [/notes/{id}]
-A single Note object with all its details
+## Long Term Voids [/ajax/ward/long_term_voids{?name,callback}]
 
 + Parameters
-    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
+    + name (required, string, `Temple Newsam`) ... Name of the ward to retrieve long term void information for.
+    + callback (optional, string, `callback`) ... Name of the callback function, if required.
 
-### Retrieve a Note [GET]
+### GET
 + Response 200 (application/json)
 
-    + Header
-
-            X-My-Header: The Value
-
-    + Body
-
-            { "id": 2, "title": "Pick-up posters from post-office" }
-
-### Remove a Note [DELETE]
-+ Response 204
+        {
+            "success": true,
+            "ward": {
+                "id": 31,
+                "created_at": "2015-02-11 15:08:48",
+                "updated_at": "2015-02-11 15:08:48",
+                "name": "Temple Newsam",
+                "long_term_voids": [
+                    {
+                        "id": 2911,
+                        "created_at": "2015-02-11 15:37:17",
+                        "updated_at": "2015-02-11 15:37:17",
+                        "ward_id": 31,
+                        "date": "2006-12-01 00:00:00",
+                        "count": 127
+                    },
+                    {
+                        "id": 2912,
+                        "created_at": "2015-02-11 15:37:17",
+                        "updated_at": "2015-02-11 15:37:17",
+                        "ward_id": 31,
+                        "date": "2007-01-01 00:00:00",
+                        "count": 124
+                    },
+                    {
+                        "id": 2913,
+                        "created_at": "2015-02-11 15:37:17",
+                        "updated_at": "2015-02-11 15:37:17",
+                        "ward_id": 31,
+                        "date": "2007-02-01 00:00:00",
+                        "count": 124
+                    }
+                ]
+            }
+        }
