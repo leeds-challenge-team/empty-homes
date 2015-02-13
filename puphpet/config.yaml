@@ -91,7 +91,8 @@ apache:
             docroot: /site/public
             port: '80'
             setenv:
-                - 'APP_ENV dev'
+                - 'LARAVEL_DOMAIN http://emptyhomes.dev'
+                - 'LARAVEL_ENV development'
             directories:
                 1xhmpq54fq8b:
                     provider: directory
