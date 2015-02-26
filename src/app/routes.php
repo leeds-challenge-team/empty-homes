@@ -14,3 +14,5 @@
 Route::get('ajax/ward/long_term_voids', 'AjaxController@longTermVoidsByWard');
 
 Route::get('ajax/pois', 'AjaxController@showPois');
+
+Route::get('ajax/property/info', 'AjaxController@propertyInfo');

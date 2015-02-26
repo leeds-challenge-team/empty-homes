@@ -122,6 +122,8 @@ return array(
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
+		'Toin0u\Geocoder\GeocoderServiceProvider',
+
 	),
 
 	/*
@@ -188,6 +190,8 @@ return array(
 		'URL'               => 'Illuminate\Support\Facades\URL',
 		'Validator'         => 'Illuminate\Support\Facades\Validator',
 		'View'              => 'Illuminate\Support\Facades\View',
+
+		'Geocoder' => 'Toin0u\Geocoder\GeocoderFacade',
 
 	),
 
