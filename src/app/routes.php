@@ -11,6 +11,6 @@
 |
 */
 
-Route::get('pois/{lat}/{lon}/{distance}', 'PoiController@showPois');
-
 Route::get('ajax/ward/long_term_voids', 'AjaxController@longTermVoidsByWard');
+
+Route::get('ajax/pois', 'AjaxController@showPois');

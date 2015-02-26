@@ -3,7 +3,7 @@ FORMAT: 1A
 HOST: http://leedsempties.nickjackson.me/
 
 # Leeds Empty Homes
-The Leeds Empty Homes API retrieves information on properties in Leeds.
+The Leeds Empty Homes API retrieves information on empty properties in Leeds.
 
 # Group Wards
 Retrieve information on wards, or organised by ward.
@@ -51,4 +51,109 @@ Retrieve information on wards, or organised by ward.
                     }
                 ]
             }
+        }
+
+# Group Points
+Retrieve information for specific geographic points.
+
+## Points of Interest [/ajax/pois{?lat,lon,types,distance,callback}]
+
+Return points of interest within a given radius of a coordinate pair.
+
++ Parameters
+    + lat (required, float, `53.800113`) ... Latitude for the center point.
+    + lon (required, float, `-1.551317`) ... Longitude for the center point.
+    + types (required, string, `school`) ... Comma delimited list of types of POI to return.
+        + Values
+            + `school`
+    + distance = `2` (optional, integer, `1.5`) ... Distance in miles from the center point to search for POIs. Maximum of 5 miles.
+    + callback (optional, string) ... Name of the callback function, if required.
+
+### GET
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "types": [
+                "school"
+            ],
+            "pois": [
+                {
+                    "type": "school",
+                    "name": "Swarthmore Education Centre",
+                    "lat": 53.801161,
+                    "lon": -1.554749,
+                    "distance": 0.16
+                },
+                {
+                    "type": "school",
+                    "name": "Leeds City  College",
+                    "lat": 53.801986,
+                    "lon": -1.544596,
+                    "distance": 0.3
+                },
+                {
+                    "type": "school",
+                    "name": "Blenheim Primary School",
+                    "lat": 53.806754,
+                    "lon": -1.54576,
+                    "distance": 0.51
+                },
+                {
+                    "type": "school",
+                    "name": "University of Leeds",
+                    "lat": 53.808258,
+                    "lon": -1.551256,
+                    "distance": 0.56
+                },
+                {
+                    "type": "school",
+                    "name": "Leeds College of Art",
+                    "lat": 53.808738,
+                    "lon": -1.549915,
+                    "distance": 0.6
+                },
+                {
+                    "type": "school",
+                    "name": "Rosebank Primary School",
+                    "lat": 53.803384,
+                    "lon": -1.565279,
+                    "distance": 0.61
+                },
+                {
+                    "type": "school",
+                    "name": "Notre Dame Catholic Sixth Form College",
+                    "lat": 53.810533,
+                    "lon": -1.551354,
+                    "distance": 0.72
+                },
+                {
+                    "type": "school",
+                    "name": "Leeds College of Building",
+                    "lat": 53.802726,
+                    "lon": -1.533685,
+                    "distance": 0.74
+                },
+                {
+                    "type": "school",
+                    "name": "Little London Community Primary School and Nursery",
+                    "lat": 53.80837,
+                    "lon": -1.538027,
+                    "distance": 0.79
+                },
+                {
+                    "type": "school",
+                    "name": "Leeds College of Music",
+                    "lat": 53.797296,
+                    "lon": -1.531346,
+                    "distance": 0.84
+                },
+                {
+                    "type": "school",
+                    "name": "St Peter's Church of England Primary School, Leeds",
+                    "lat": 53.800306,
+                    "lon": -1.528595,
+                    "distance": 0.93
+                }
+            ]
         }
