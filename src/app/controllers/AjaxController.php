@@ -76,7 +76,8 @@ class AjaxController extends BaseController {
                 'name' => $school->name,
                 'lat' => (float) $school->latitude,
                 'lon' => (float) $school->longitude,
-                'distance' => round($school->distance, 2)
+                'distance' => round($school->distance, 2),
+                'inspections' => $school->inspections()->slim()->orderBy('start_date', 'desc')->first()
             );
         }
 
