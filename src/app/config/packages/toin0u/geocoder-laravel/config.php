@@ -13,8 +13,7 @@ return array(
     // Providers get called in the chain order given here.
     // The first one to return a result will be used.
     'providers' => array(
-        'Geocoder\Provider\GoogleMapsProvider' => array('en-GB', 'Leeds', true),
-        'Geocoder\Provider\FreeGeoIpProvider'  => null,
+        'Geocoder\Provider\OpenStreetMapProvider'  => null,
     ),
     'adapter'  => 'Geocoder\HttpAdapter\CurlHttpAdapter'
 );
