@@ -13,42 +13,13 @@ class AjaxController extends BaseController {
             throw new \Exception('You must provide a postcode!');
         }
 
-        // Try geocode the address
-        $geocode = Geocoder::geocode(Input::get('address') . ', Leeds, ' . Input::get('postcode'));
+        // Go retrieve the property!
+        $property = new SmartProperty(Input::get('address'), 'Leeds', Input::get('postcode'));
 
-        // If we've got to here, we've geocoded successfully.
+        // Dump the property object to output
+        $data['property'] = $property->db;
 
-        // Build the property array, this comes in useful later.
-        $property = array(
-            'street_number' => $geocode->getStreetNumber(),
-            'street_name'   => $geocode->getStreetName(),
-            'city'          => $geocode->getCity(),
-            'postcode'      => $geocode->getZipcode(),
-            'latitude'      => (float) ($geocode->getBounds()['north'] + $geocode->getBounds()['south'])/2,
-            'longitude'      => (float) ($geocode->getBounds()['east'] + $geocode->getBounds()['west'])/2
-        );
-
-        // Dump the property array to output
-        $data['property'] = $property;
-
-        // Try find the ward data from MapIt
-        $mapit_data = json_decode(file_get_contents('http://mapit.mysociety.org/postcode/' . urlencode($property['postcode'])));
-
-        $ward_data = json_decode(file_get_contents('http://mapit.mysociety.org/area/' . $mapit_data->shortcuts->ward));
-
-        // Look up the ward in our internal listing
-        $ward = Ward::where('name', '=', $ward_data->name)->with('longTermVoids')->first();
-
-        $data['ward']['name'] = $ward->name;
-
-        $data['ward']['void_count_history'] = array();
-
-        foreach ($ward->longTermVoids as $ltv){
-            $data['ward']['void_count_history'][] = array(
-                'date' => $ltv->date->toIso8601String(),
-                'count' => (int) $ltv->count
-            );
-        }
+        $property->db->ward->load('longTermVoids');
 
         // Make sure we have at least empty POI arrays
         $data['pois'] = array(
@@ -59,10 +30,10 @@ class AjaxController extends BaseController {
         $schools = School::
             select(DB::raw('*, (
                 3959 * acos (
-                    cos ( radians(' . $property['latitude'] . ') )
+                    cos ( radians(' . $property->db->latitude . ') )
                     * cos( radians( latitude ) )
-                    * cos( radians( longitude ) - radians(' . $property['longitude'] . ') )
-                    + sin ( radians(' . $property['latitude'] . ') )
+                    * cos( radians( longitude ) - radians(' . $property->db->longitude . ') )
+                    + sin ( radians(' . $property->db->latitude . ') )
                     * sin( radians( latitude ) )
                 )
             ) as distance'))
@@ -72,13 +43,7 @@ class AjaxController extends BaseController {
 
         // Build up the schools POI array
         foreach ($schools as $school) {
-            $data['pois']['schools'][] = array(
-                'name' => $school->name,
-                'lat' => (float) $school->latitude,
-                'lon' => (float) $school->longitude,
-                'distance' => round($school->distance, 2),
-                'inspections' => $school->inspections()->slim()->orderBy('start_date', 'desc')->get()
-            );
+            $data['pois']['schools'][] = $school->load('inspections');
         }
 
         // Assemble the response
