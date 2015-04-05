@@ -4,7 +4,7 @@ class School extends Eloquent {
 
 	protected $table = 'schools';
 
-    protected $visible = array('id', 'name', 'latitude', 'longitude', 'inspections');
+    protected $visible = array('id', 'name', 'latitude', 'longitude', 'inspections', 'distance');
 
     public function inspections()
     {

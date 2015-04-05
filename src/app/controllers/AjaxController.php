@@ -23,7 +23,8 @@ class AjaxController extends BaseController {
 
         // Make sure we have at least empty POI arrays
         $data['pois'] = array(
-            'schools' => array()
+            'schools' => array(),
+            'bid_properties' => array()
         );
 
         // Get the Schools from the database
@@ -44,6 +45,28 @@ class AjaxController extends BaseController {
         // Build up the schools POI array
         foreach ($schools as $school) {
             $data['pois']['schools'][] = $school->load('inspections');
+        }
+
+        // Get the properties from the database
+        $bid_properties = Property::
+            select(DB::raw('*, (
+                3959 * acos (
+                    cos ( radians(' . $property->db->latitude . ') )
+                    * cos( radians( latitude ) )
+                    * cos( radians( longitude ) - radians(' . $property->db->longitude . ') )
+                    + sin ( radians(' . $property->db->latitude . ') )
+                    * sin( radians( latitude ) )
+                )
+            ) as distance'))
+            ->having('distance', '<', 2)
+            ->orderBy('distance')
+            ->has('bidHistory')
+            ->with('bidHistory')
+            ->get();
+
+        // Build up the schools POI array
+        foreach ($bid_properties as $bid_property) {
+            $data['pois']['bid_properties'][] = $bid_property;
         }
 
         // Assemble the response

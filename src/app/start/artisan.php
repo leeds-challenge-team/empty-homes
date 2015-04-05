@@ -12,3 +12,4 @@
 */
 
 Artisan::add(new loadLTECSV);
+Artisan::add(new loadBidHistoryCSV);

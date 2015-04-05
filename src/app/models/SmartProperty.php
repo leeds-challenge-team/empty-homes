@@ -14,11 +14,12 @@ class SmartProperty {
             'postcode' => $postcode
         ));
 
+        $this->db = $property;
+
         // Do we have lat and long for this?
         if ($property->latitude AND $property->longitude) {
 
             // Awesome, set the DB property so we know what we're doing.
-            $this->db = $property;
             $this->source = 'database';
 
         } else {
@@ -30,41 +31,48 @@ class SmartProperty {
 
                 // If we've got to here, we've geocoded successfully.
 
-                $property = new Property;
-
-                $property->street_address = $street_address;
-                $property->city = $city;
-                $property->postcode = $postcode;
                 $property->latitude = (float) ($geocode->getBounds()['north'] + $geocode->getBounds()['south'])/2;
                 $property->longitude = (float) ($geocode->getBounds()['east'] + $geocode->getBounds()['west'])/2;
 
                 $property->save();
 
-                $this->db = $property;
                 $this->source = 'geocoder';
+
+                // Because we geocoded, cool off for half a second
+                sleep(0.5);
 
             } catch (Exception $e) {
 
                 // Something has gone AWOL doing geocoding.
-                exit('bum');
+                // throw new Exception('Couldn\'t geocode ' . $property->street_address . ': ' . $e->getMessage());
+
+                $this->source = 'plain';
 
             }
 
         }
 
-        // Awesome, property sorted. Now try find the ward data from MapIt
-        $mapit_data = json_decode(file_get_contents('http://mapit.mysociety.org/postcode/' . urlencode($property->postcode)));
+        // Awesome, property sorted. Now, ward.
 
-        $ward_data = json_decode(file_get_contents('http://mapit.mysociety.org/area/' . $mapit_data->shortcuts->ward));
+        if (!$property->ward) {
 
-        $ward = Ward::firstOrNew(array('name' => $ward_data->name));
+            $mapit_data = json_decode(file_get_contents('http://mapit.mysociety.org/postcode/' . urlencode($property->postcode)));
 
-        if ($ward->mapit_id == null) {
-            $ward->mapit_id = $mapit_data->shortcuts->ward;
-            $ward->save();
+            $ward_data = json_decode(file_get_contents('http://mapit.mysociety.org/area/' . $mapit_data->shortcuts->ward));
+
+            $ward = Ward::firstOrNew(array('name' => $ward_data->name));
+
+            if ($ward->mapit_id == null) {
+                $ward->mapit_id = $mapit_data->shortcuts->ward;
+                $ward->save();
+            }
+
+            $property->ward()->associate($ward);
+
+            // Done a mapIt hit, sleep for a second.
+            sleep(1);
+
         }
-
-        $property->ward()->associate($ward);
 
         $property->save();
 
