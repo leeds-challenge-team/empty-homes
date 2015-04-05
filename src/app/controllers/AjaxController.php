@@ -19,7 +19,9 @@ class AjaxController extends BaseController {
         // Dump the property object to output
         $data['property'] = $property->db;
 
+        // Load the supplemental bits we need
         $property->db->ward->load('longTermVoids');
+        $property->db->load('bidHistory');
 
         // Make sure we have at least empty POI arrays
         $data['pois'] = array(
@@ -38,7 +40,7 @@ class AjaxController extends BaseController {
                     * sin( radians( latitude ) )
                 )
             ) as distance'))
-            ->having('distance', '<', 2)
+            ->having('distance', '<', 1)
             ->orderBy('distance')
             ->get();
 
@@ -58,7 +60,8 @@ class AjaxController extends BaseController {
                     * sin( radians( latitude ) )
                 )
             ) as distance'))
-            ->having('distance', '<', 2)
+            ->where('id', '!=', $property->db->id)
+            ->having('distance', '<', 1)
             ->orderBy('distance')
             ->has('bidHistory')
             ->with('bidHistory')

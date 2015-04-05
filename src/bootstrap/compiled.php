@@ -1489,7 +1489,7 @@ class Request
     public function getClientIps()
     {
         $ip = $this->server->get('REMOTE_ADDR');
-        if (!self::$trustedProxies) {
+        if (!$this->isFromTrustedProxy()) {
             return array($ip);
         }
         if (!self::$trustedHeaders[self::HEADER_CLIENT_IP] || !$this->headers->has(self::$trustedHeaders[self::HEADER_CLIENT_IP])) {
@@ -1544,7 +1544,7 @@ class Request
     }
     public function getPort()
     {
-        if (self::$trustedProxies) {
+        if ($this->isFromTrustedProxy()) {
             if (self::$trustedHeaders[self::HEADER_CLIENT_PORT] && ($port = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_PORT]))) {
                 return $port;
             }
@@ -1620,7 +1620,7 @@ class Request
     }
     public function isSecure()
     {
-        if (self::$trustedProxies && self::$trustedHeaders[self::HEADER_CLIENT_PROTO] && ($proto = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_PROTO]))) {
+        if ($this->isFromTrustedProxy() && self::$trustedHeaders[self::HEADER_CLIENT_PROTO] && ($proto = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_PROTO]))) {
             return in_array(strtolower(current(explode(',', $proto))), array('https', 'on', 'ssl', '1'));
         }
         $https = $this->server->get('HTTPS');
@@ -1628,7 +1628,7 @@ class Request
     }
     public function getHost()
     {
-        if (self::$trustedProxies && self::$trustedHeaders[self::HEADER_CLIENT_HOST] && ($host = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_HOST]))) {
+        if ($this->isFromTrustedProxy() && self::$trustedHeaders[self::HEADER_CLIENT_HOST] && ($host = $this->headers->get(self::$trustedHeaders[self::HEADER_CLIENT_HOST]))) {
             $elements = explode(',', $host);
             $host = $elements[count($elements) - 1];
         } elseif (!($host = $this->headers->get('HOST'))) {
@@ -1988,6 +1988,10 @@ class Request
             return $request;
         }
         return new static($query, $request, $attributes, $cookies, $files, $server, $content);
+    }
+    private function isFromTrustedProxy()
+    {
+        return self::$trustedProxies && IpUtils::checkIp($this->server->get('REMOTE_ADDR'), self::$trustedProxies);
     }
 }
 namespace Symfony\Component\HttpFoundation;
@@ -10827,6 +10831,7 @@ class Run
             $this->writeToOutputNow($output);
         }
         if ($willQuit) {
+            flush();
             die(1);
         }
         return $output;
@@ -10841,13 +10846,15 @@ class Run
                     return true;
                 }
             }
-            $exception = new ErrorException($message, $level, 0, $file, $line);
+            $exception = new ErrorException($message, $level, $level, $file, $line);
             if ($this->canThrowExceptions) {
                 throw $exception;
             } else {
                 $this->handleException($exception);
             }
+            return true;
         }
+        return false;
     }
     public function handleShutdown()
     {
